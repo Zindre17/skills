@@ -1,0 +1,5 @@
+# /linus: throwaway attempts in fresh sub-agents, final attempt in the main agent
+
+/linus implements a feature three times. Attempts 1 and 2 are written by fresh sub-agents, each in its own git worktree, and discarded; attempt 3 is written by the main agent. We chose this over all-in-main (the old code stays in context, so attempt 2 becomes attempt 1 with edits rather than a rethink) and over three sub-agents (the final author would see nothing but notes). The cost is that no single author feels all the friction first-hand, so the **Friction log** is the load-bearing artifact: the sub-agent writes it live while it works, and the main agent audits it against the diff and test output before it is passed on.
+
+What each attempt may see is deliberately asymmetric: attempt 2 gets friction log 1 only, never attempt 1's code, to force a genuine rethink; the final attempt gets both logs and both diffs, but must write a **Design brief** before any code, so it becomes a third design rather than a merge of the first two. Attempts 2 and 3 both write a brief; attempt 1 goes gut-first by definition.
