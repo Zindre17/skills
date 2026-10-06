@@ -1,0 +1,5 @@
+# /linus requires a clean working tree
+
+/linus now stops at preflight if the working tree has any uncommitted change, staged, unstaged or untracked, and asks the user to commit or stash first. This replaces the refinement's answer to Q11, which offered to snapshot the uncommitted work into each attempt's worktree. Requiring only a clean index was rejected, because unstaged and untracked work would still mix into the final attempt and its commit.
+
+The snapshot path was where most of the method's failures lived: a patch-plus-tar snapshot that could not capture or restore ordinary dirty trees, the user's work showing up in attempt diffs as attempt code, and a final attempt landing on top of that work with no safe way to commit it. With a clean start, every change at the end belongs to the final attempt, so step 10 can stage and commit it. Committing or stashing is cheap, and the user is the right person to decide what their uncommitted work is. Untracked character devices are ignored, since the Bash sandbox uses them to mask paths and they are not the user's work.
