@@ -5,5 +5,4 @@ disable-model-invocation: true
 argument-hint: <feature to implement>
 ---
 
-Follow `../linus/METHOD.md`, relative to this skill's directory, with the **gate off**, and
-take the feature request from the arguments.
+Follow `../linus/METHOD.md`, relative to this skill's directory, with the **gate off**, and take the feature request from the arguments.

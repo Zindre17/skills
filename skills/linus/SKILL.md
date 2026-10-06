@@ -5,5 +5,4 @@ disable-model-invocation: true
 argument-hint: <feature to implement>
 ---
 
-Follow `METHOD.md` in this skill's directory, with the **gate on**, and take the feature
-request from the arguments.
+Follow `METHOD.md` in this skill's directory, with the **gate on**, and take the feature request from the arguments.
