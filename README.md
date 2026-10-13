@@ -15,10 +15,10 @@ Personal Claude Code skills.
 This repository is a Claude Code plugin and its own marketplace. In a terminal session:
 
 ```
-/plugin install myskills --marketplace Zindre17/skills
+/plugin install sindre --marketplace Zindre17/skills
 ```
 
-Answer `y` to add the marketplace, then pick a scope. Installed this way, the skills are namespaced as `myskills:refine`, `myskills:linus` and `myskills:linus-auto`.
+Answer `y` to add the marketplace, then pick a scope. Installed this way, the skills are namespaced as `sindre:refine`, `sindre:linus` and `sindre:linus-auto`.
 
 ## Dependencies
 

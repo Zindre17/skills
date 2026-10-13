@@ -6,7 +6,7 @@
   "description": "Sindre Aarstrand's personal Claude Code skills.",
   "plugins": [
     {
-      "name": "myskills",
+      "name": "sindre",
       "source": "./",
       "description": "Personal skills: /refine, /linus and /linus-auto."
     }
