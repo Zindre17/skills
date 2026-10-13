@@ -12,17 +12,24 @@ Personal Claude Code skills.
 
 ## Install
 
-Symlink each skill into your personal skills directory:
+This repository is a Claude Code plugin and its own marketplace. In a terminal session:
 
-```bash
-git clone git@github.com:Zindre17/skills.git ~/code/myskills
-for s in ~/code/myskills/skills/*/; do ln -s "${s%/}" ~/.claude/skills/; done
 ```
+/plugin install myskills --marketplace Zindre17/skills
+```
+
+Answer `y` to add the marketplace, then pick a scope. Installed this way, the skills are namespaced as `myskills:refine`, `myskills:linus` and `myskills:linus-auto`.
 
 ## Dependencies
 
-`/refine` uses the `domain-modeling` skill from [Matt Pocock's skills](https://github.com/mattpocock/skills) plugin, and stops at the start if it is missing. Install it with:
+`/refine` uses the `domain-modeling` skill from [Matt Pocock's skills](https://github.com/mattpocock/skills). The plugin declares `mattpocock-skills@claude-plugins-official` as a dependency, so installing it also installs that plugin, provided the `claude-plugins-official` marketplace is added. If the skill is still missing, `/refine` stops at the start and asks you to install it.
 
+## Development
+
+Run a session against the working copy, so edits apply without a reinstall:
+
+```bash
+claude --plugin-dir ~/code/myskills
 ```
-/plugin install mattpocock-skills@claude-plugins-official
-```
+
+An installed copy only updates when `version` in `.claude-plugin/plugin.json` is bumped.

@@ -1,0 +1,14 @@
+{
+  "name": "zindre17",
+  "owner": {
+    "name": "Sindre Aarstrand"
+  },
+  "description": "Sindre Aarstrand's personal Claude Code skills.",
+  "plugins": [
+    {
+      "name": "myskills",
+      "source": "./",
+      "description": "Personal skills: /refine, /linus and /linus-auto."
+    }
+  ]
+}

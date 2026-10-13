@@ -1,0 +1,8 @@
+{
+  "name": "myskills",
+  "version": "0.1.0",
+  "description": "Personal skills: /refine, /linus and /linus-auto.",
+  "author": { "name": "Sindre Aarstrand" },
+  "repository": "https://github.com/Zindre17/skills",
+  "dependencies": ["mattpocock-skills@claude-plugins-official"]
+}
