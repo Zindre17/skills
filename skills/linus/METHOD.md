@@ -1,27 +1,28 @@
 # The /linus method
 
-Implement the feature three times. Attempt 1 is the **gut** version. Attempt 2 is a **rethink** driven by attempt 1's friction. The final attempt reconciles both: attempt 2 fixes what fought back in attempt 1, but it usually oversimplifies something attempt 1 got right.
+Implement the feature three times. Attempt 1 is the **gut** version. Attempt 2 is a **rethink** that answers the problems found in attempt 1. The final attempt reconciles both: attempt 2 fixes attempt 1's problems, but it usually oversimplifies something attempt 1 got right.
 
 The skill that sent you here says whether the **gate** is on.
 
 ## Terms
 
-- **Friction**: anything that fought back while getting an attempt to work, such as awkward APIs, wiring pain, edge cases that forced contortions, or tests that were hard to write. It also covers the opposite: what an attempt got right that a simpler shape would lose.
-- **Friction log**: one attempt's friction, written as prose while the work happens. Name functions, types and files, but leave the code in the diff.
-- **Design brief**: the shape of the next attempt, written before any of its code. It covers the modules, the data flow and the public interface, and says how each logged friction is answered.
+- **Problem**: a place where the code or design was harder than it should be, such as an awkward API, complicated wiring, an edge case that needed special handling, or behaviour that was hard to test.
+- **Strength**: something an attempt's design handles well that a simpler design would lose.
+- **Design notes**: one attempt's problems and strengths, written as prose about the code. Name functions, types and files, but leave the code itself in the diff.
+- **Design brief**: the shape of the next attempt, written before any of its code. It covers the modules, the data flow and the public interface, and says how each noted problem is answered.
 - **Green**: it builds and every test passes, both the existing tests and the attempt's own new ones. Tests already failing at `BASE` don't count.
 - **Stuck**: three failed fixes in a row for the same failure, or ten failed fixes in total.
 
-## Friction log format
+## Design notes format
 
 ```
-# Attempt N friction log
-## Shape         -- the design, in 3-6 lines
-## Fought back   -- each friction: where, what, how it was worked around
-## Hacks         -- anything you'd be embarrassed to defend in review
-## Dead ends     -- approaches tried and abandoned, and why
-## Got right     -- what this shape handled well that a simpler one would lose
-## Status        -- green / stuck (what blocked)
+# Attempt N design notes
+## Shape                -- the design, in 3-6 lines
+## Problems             -- each problem: where in the code, what it was, how the code handles it
+## Shortcuts            -- code that would need cleanup before it could be merged
+## Rejected approaches  -- designs tried and dropped, and the technical reason
+## Strengths            -- what this design handles well that a simpler one would lose
+## Status               -- green / stuck (what blocked)
 ```
 
 ## Sub-agent prompt
@@ -50,10 +51,10 @@ You are writing attempt <N> of a feature in a git worktree that will be thrown a
 
 Implement the whole feature. If part of it can't be done, that is stuck, not a reason to skip it.
 
-## Friction log
-Keep `<WORK>/attempt-<N>-log.md` updated while you work, not only at the end. Friction is anything that fought back while getting this to work, such as awkward APIs, wiring pain, edge cases that forced contortions, or tests that were hard to write. It is also what your shape got right that a simpler one would lose. Name functions, types and files, but put no code in the log, because a later attempt must not see your code. Use this format:
+## Design notes
+Write `<WORK>/attempt-<N>-notes.md` as you go, adding each problem when you hit it, so the notes survive if the run stops early. A problem is a place where the code or design was harder than it should be, such as an awkward API, complicated wiring, an edge case that needed special handling, or behaviour that was hard to test. A strength is something your design handles well that a simpler one would lose. Name functions, types and files, but describe the code in words rather than pasting it, because the next attempt designs from these notes, not from your code. Use this format:
 
-<the friction log format, verbatim>
+<the design notes format, verbatim>
 
 ## Finish
 Drive it to green. If you get stuck, stop and record exactly what blocked you under Status. Either way, commit all your work in the worktree before returning. Return the worktree path, the branch name, and the test summary with any failures.
@@ -104,48 +105,48 @@ Dispatch a fresh sub-agent with the Agent tool and `isolation: "worktree"`, givi
 
 > Implement this the way it first comes to mind. Take the shape that feels natural, and let the problems show themselves.
 
-Then check the result. If the worktree has uncommitted changes, commit them yourself and note that under `## Audit` in the log. If the branch has no commits beyond `BASE`, or the log is missing or has no Status, the attempt didn't finish: remove its worktree and branch and dispatch it once more. If the second try also doesn't finish, stop early.
+Then check the result. If the worktree has uncommitted changes, commit them yourself and note that under `## Audit` in the notes. If the branch has no commits beyond `BASE`, or the notes are missing or have no Status, the attempt didn't finish: remove its worktree and branch and dispatch it once more. If the second try also doesn't finish, stop early.
 
-Done when attempt 1's work is committed on its branch and `WORK/attempt-1-log.md` has a Status.
+Done when attempt 1's work is committed on its branch and `WORK/attempt-1-notes.md` has a Status.
 
 ### 3. Audit attempt 1
 
-Save `git diff BASE..<attempt-1 branch>` to `WORK/attempt-1.diff`. Read the log, the diff and the test output. Look for friction the author left unflagged, such as special cases, duplicated logic, awkward call sites, tests that mock around the real problem, or TODOs. Append these to the log under `## Audit`.
+Save `git diff BASE..<attempt-1 branch>` to `WORK/attempt-1.diff`. Read the notes, the diff and the test output. Look for problems the notes don't mention, such as special cases, duplicated logic, awkward call sites, tests that mock around the real problem, or TODOs. Append these to the notes under `## Audit`.
 
 Then remove attempt 1's worktree with `git worktree remove --force` and its branch with `git branch -D`. With no git, save `diff -ru` of the project against `WORK/attempt-1/` instead, and delete the copy. Attempt 2 must not be able to find attempt 1's code, and a checkout left inside the repo would be picked up by test runners and linters.
 
-Done when every hunk of the diff is either covered by the log or added to the audit, and attempt 1's worktree and branch are gone.
+Done when every hunk of the diff is either covered by the notes or added to the audit, and attempt 1's worktree and branch are gone.
 
 ### 4. Attempt 2: rethink
 
-Dispatch another fresh sub-agent with `isolation: "worktree"`, giving it the **sub-agent prompt** with `N` = 2 and this approach, followed by the full text of the audited `WORK/attempt-1-log.md`:
+Dispatch another fresh sub-agent with `isolation: "worktree"`, giving it the **sub-agent prompt** with `N` = 2 and this approach, followed by the full text of the audited `WORK/attempt-1-notes.md`:
 
-> An earlier attempt at this feature was thrown away. Its friction log follows, and it is your only knowledge of that attempt.
+> An earlier implementation of this feature was set aside. Its design notes follow; design from them rather than from its code.
 >
-> Before any code, write `<WORK>/attempt-2-brief.md`. Give the shape you will build and say how that shape answers each item under Fought back, Hacks, Dead ends and Audit, and any blocker under Status. Then implement the brief. Once you start coding, leave the brief as it is and record any departure from it in your log under Fought back.
+> Before any code, write `<WORK>/attempt-2-brief.md`. Give the shape you will build and say how that shape answers each item under Problems, Shortcuts, Rejected approaches and Audit, and any blocker under Status. Then implement the brief. Once you start coding, leave the brief as it is and record any departure from it in your notes under Problems.
 
 Check the result the same way as in step 2.
 
-Done when attempt 2's work is committed on its branch, `WORK/attempt-2-brief.md` exists, and `WORK/attempt-2-log.md` has a Status.
+Done when attempt 2's work is committed on its branch, `WORK/attempt-2-brief.md` exists, and `WORK/attempt-2-notes.md` has a Status.
 
 ### 5. Audit attempt 2
 
-Do the same as step 3 for attempt 2, saving its diff to `WORK/attempt-2.diff`, and remove its worktree and branch at the end. Also compare the result with `attempt-2-brief.md`. Where the brief promised something the code did not deliver, or the log records a departure, log it as friction.
+Do the same as step 3 for attempt 2, saving its diff to `WORK/attempt-2.diff`, and remove its worktree and branch at the end. Also compare the result with `attempt-2-brief.md`. Where the brief promised something the code did not deliver, or the notes record a departure, add it to the notes as a problem.
 
-Then compare attempt 2 with attempt 1 directly. List what attempt 1 handled: each item in log 1 under `## Got right`, and each behaviour that attempt 1's new tests cover in `attempt-1.diff`. For each, check whether attempt 2 still handles it. Where it doesn't, log it under a new heading, `## Oversimplified`. This is the friction the final attempt exists to resolve.
+Then compare attempt 2 with attempt 1 directly. List what attempt 1 handled: each item in attempt 1's notes under `## Strengths`, and each behaviour that attempt 1's new tests cover in `attempt-1.diff`. For each, check whether attempt 2 still handles it. Where it doesn't, add it to attempt 2's notes under a new heading, `## Oversimplified`. These are the problems the final attempt exists to resolve.
 
-Done when every hunk of the diff is either covered by the log or added to the audit, everything on that list has been checked, and attempt 2's worktree and branch are gone.
+Done when every hunk of the diff is either covered by the notes or added to the audit, everything on that list has been checked, and attempt 2's worktree and branch are gone.
 
 ### 6. Final design brief
 
-Read both logs, the attempt 2 brief and both saved diffs. Write `WORK/final-brief.md` **before writing any code**:
+Read both sets of notes, the attempt 2 brief and both saved diffs. Write `WORK/final-brief.md` **before writing any code**:
 - the shape, in the brief's own terms
-- for every item in either log's Fought back, Hacks, Dead ends, Audit and Oversimplified sections, how the final shape answers it
+- for every item in either set of notes under Problems, Shortcuts, Rejected approaches, Audit and Oversimplified, how the final shape answers it
 - what is deliberately kept from each attempt, and why it holds up in the new shape
 
 The brief describes one coherent design that stands on its own. It is a third design, not a list of which pieces to take from attempt 1 and which from attempt 2. If the brief reads like a merge, rethink the shape until it doesn't.
 
-Done when every logged friction has an answer in the brief.
+Done when every noted problem has an answer in the brief.
 
 ### 7. Gate (only when the gate is on)
 
@@ -165,7 +166,7 @@ Done when the attempt is green, the brief matches the finished code, and the aud
 
 ### 9. Clean up
 
-Check with `git worktree list` and `git branch` that no throwaway worktree or branch remains, and remove any that do. With no git, delete the `WORK/attempt-N/` copies. Keep the logs, briefs and diffs in `WORK` for now, because steps 10 and 11 still need them.
+Check with `git worktree list` and `git branch` that no throwaway worktree or branch remains, and remove any that do. With no git, delete the `WORK/attempt-N/` copies. Keep the notes, briefs and diffs in `WORK` for now, because steps 10 and 11 still need them.
 
 ### 10. Commit
 
@@ -192,7 +193,7 @@ Then stage exactly those paths, each without its 3-character status prefix, with
 
 Tell the user:
 - the final design brief, including anything under Changed during implementation
-- one line per attempt: its shape and its loudest friction
+- one line per attempt: its shape and its biggest problem
 - anything that was oversimplified and then restored
 - any degradations
 - the commit hash, or the drafted commit message and why it wasn't committed
