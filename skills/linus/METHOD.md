@@ -56,6 +56,13 @@ Write `<WORK>/attempt-<N>-notes.md` as you go, adding each problem when you hit 
 
 <the design notes format, verbatim>
 
+## Keeping your context small
+This code will be thrown away, and everything you print or read stays in your context for the rest of the run, so keep it short:
+- While iterating, run only the tests for the code you are changing. Run the full suite once at the end.
+- Use the test runner's quietest reporter, and pipe build and test output through `tail -n 40`. If failures scroll past, rerun only the failing tests.
+- Read large files by line range, and find things with grep rather than printing whole files.
+- Skip the project's own review and verification routines, such as screenshots, browser checks, reviewer sub-agents and doc updates. Green is the bar for this attempt.
+
 ## Finish
 Drive it to green. If you get stuck, stop and record exactly what blocked you under Status. Either way, commit all your work in the worktree before returning. Return the worktree path, the branch name, and the test summary with any failures.
 ````
@@ -101,7 +108,7 @@ Done when `WORK/state.md` holds all of the above, or the degradations that repla
 
 ### 2. Attempt 1: gut
 
-Dispatch a fresh sub-agent with the Agent tool and `isolation: "worktree"`, giving it the **sub-agent prompt** with `N` = 1 and this approach:
+Dispatch a fresh sub-agent with the Agent tool, `isolation: "worktree"` and `model: "sonnet"`, giving it the **sub-agent prompt** with `N` = 1 and this approach:
 
 > Implement this the way it first comes to mind. Take the shape that feels natural, and let the problems show themselves.
 
@@ -111,7 +118,7 @@ Done when attempt 1's work is committed on its branch and `WORK/attempt-1-notes.
 
 ### 3. Audit attempt 1
 
-Save `git diff BASE..<attempt-1 branch>` to `WORK/attempt-1.diff`. Read the notes, the diff and the test output. Look for problems the notes don't mention, such as special cases, duplicated logic, awkward call sites, tests that mock around the real problem, or TODOs. Append these to the notes under `## Audit`.
+Save `git diff BASE..<attempt-1 branch>` to `WORK/attempt-1.diff` without printing it. Read the notes and the test output, then `git diff --stat` for the same range, then read the saved diff one file at a time, skipping lockfiles and generated files. Never print the whole diff at once, because it stays in your context through the final attempt. Look for problems the notes don't mention, such as special cases, duplicated logic, awkward call sites, tests that mock around the real problem, or TODOs. Append these to the notes under `## Audit`.
 
 Then remove attempt 1's worktree with `git worktree remove --force` and its branch with `git branch -D`. With no git, save `diff -ru` of the project against `WORK/attempt-1/` instead, and delete the copy. Attempt 2 must not be able to find attempt 1's code, and a checkout left inside the repo would be picked up by test runners and linters.
 
@@ -119,7 +126,7 @@ Done when every hunk of the diff is either covered by the notes or added to the 
 
 ### 4. Attempt 2: rethink
 
-Dispatch another fresh sub-agent with `isolation: "worktree"`, giving it the **sub-agent prompt** with `N` = 2 and this approach, followed by the full text of the audited `WORK/attempt-1-notes.md`:
+Dispatch another fresh sub-agent with `isolation: "worktree"` and `model: "sonnet"`, giving it the **sub-agent prompt** with `N` = 2 and this approach, followed by the full text of the audited `WORK/attempt-1-notes.md`:
 
 > An earlier implementation of this feature was set aside. Its design notes follow; design from them rather than from its code.
 >
@@ -139,7 +146,7 @@ Done when every hunk of the diff is either covered by the notes or added to the 
 
 ### 6. Final design brief
 
-Read both sets of notes, the attempt 2 brief and both saved diffs. Write `WORK/final-brief.md` **before writing any code**:
+Read both sets of notes and the attempt 2 brief. You already read both diffs during the audits, so go back to the saved diffs only for specific files or hunks, not in full. Write `WORK/final-brief.md` **before writing any code**:
 - the shape, in the brief's own terms
 - for every item in either set of notes under Problems, Shortcuts, Rejected approaches, Audit and Oversimplified, how the final shape answers it
 - what is deliberately kept from each attempt, and why it holds up in the new shape
